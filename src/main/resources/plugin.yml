@@ -1,0 +1,7 @@
+name: serene
+version: '1.0'
+main: dev.ethann.serene.Serene
+api-version: '1.21'
+load: STARTUP
+authors: [ Ethan Davies ]
+description: Utility library for Minecraft Paper plugins
