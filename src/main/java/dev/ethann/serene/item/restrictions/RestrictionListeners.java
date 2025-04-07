@@ -17,19 +17,17 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 public class RestrictionListeners implements Listener {
-    @Getter private static Set<Player> updateInventoryQueue;
-    @Getter private static Set<UUID> playerSet;
-
-    public RestrictionListeners() {
-        updateInventoryQueue = new HashSet<>();
-        playerSet = new HashSet<>();
-    }
+    @Getter
+    private static final Set<Player> updateInventoryQueue = new HashSet<>();
+    @Getter
+    private static final Set<UUID> playerSet = new HashSet<>();
 
     @EventHandler(priority = EventPriority.LOWEST)
     private void handlePlayerOnly(InventoryClickEvent event) {
@@ -41,45 +39,64 @@ public class RestrictionListeners implements Listener {
         ClickType click = event.getClick();
         Inventory clickedInventory = event.getClickedInventory();
 
-        if (clickedInventory == null || clickedInventory.getType() == InventoryType.PLAYER) {
+        if (clickedInventory == null ||
+                clickedInventory.getType() == InventoryType.PLAYER) {
             return;
         }
 
         switch (click) {
             case NUMBER_KEY -> {
-                DataStack hotbarItem = (DataStack) player.getInventory().getItem(event.getHotbarButton());
-                if (hotbarItem != null && hotbarItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
-                    event.setCancelled(true);
+                ItemStack hotbar = player.getInventory().getItem(event.getHotbarButton());
+                if (hotbar != null) {
+                    DataStack hotbarItem = new DataStack(hotbar);
+                    if (hotbarItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
+                        event.setCancelled(true);
+                    }
                 }
             }
             case LEFT, RIGHT -> {
-                DataStack cursorItem = (DataStack) event.getCursor();
-                if (cursorItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
-                    event.setCancelled(true);
+                ItemStack cursor = event.getCursor();
+                if (cursor != null) {
+                    DataStack cursorItem = new DataStack(cursor);
+                    if (cursorItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
+                        event.setCancelled(true);
+                    }
                 }
             }
             case SHIFT_LEFT, SHIFT_RIGHT -> {
-                DataStack clickedItem = (DataStack) event.getCurrentItem();
-                if (clickedItem != null && clickedItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
-                    event.setCancelled(true);
+                ItemStack clicked = event.getCurrentItem();
+                if (clicked != null) {
+                    DataStack clickedItem = new DataStack(clicked);
+                    if (clickedItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
+                        event.setCancelled(true);
+                    }
                 }
             }
             case SWAP_OFFHAND -> {
-                DataStack offhandItem = (DataStack) player.getInventory().getItemInOffHand();
-                if (offhandItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
-                    event.setCancelled(true);
+                ItemStack offhand = player.getInventory().getItemInOffHand();
+                if (offhand != null) {
+                    DataStack offhandItem = new DataStack(offhand);
+                    if (offhandItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
+                        event.setCancelled(true);
+                    }
                 }
             }
         }
 
-        DataStack currentItem = (DataStack) event.getCurrentItem();
-        if (currentItem != null && currentItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
-            event.setCancelled(true);
+        ItemStack current = event.getCurrentItem();
+        if (current != null) {
+            DataStack currentItem = new DataStack(current);
+            if (currentItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
+                event.setCancelled(true);
+            }
         }
 
-        DataStack cursorItem = (DataStack) event.getCursor();
-        if (cursorItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
-            event.setCancelled(true);
+        ItemStack cursor = event.getCursor();
+        if (cursor != null) {
+            DataStack cursorItem = new DataStack(cursor);
+            if (cursorItem.hasRestriction(Restrictions.PLAYER_ONLY)) {
+                event.setCancelled(true);
+            }
         }
 
         updateInventoryQueue.add(player);
@@ -96,33 +113,46 @@ public class RestrictionListeners implements Listener {
         Inventory clickedInventory = event.getClickedInventory();
         Inventory topInventory = player.getOpenInventory().getTopInventory();
 
-        if (clickedInventory != null && clickedInventory.getType() == InventoryType.PLAYER) {
+        if (clickedInventory != null &&
+                clickedInventory.getType() == InventoryType.PLAYER) {
             switch (click) {
                 case NUMBER_KEY -> {
-                    DataStack item = (DataStack) player.getInventory().getItem(event.getHotbarButton());
-                    if (item != null && topInventory.getType() != InventoryType.PLAYER &&
-                            item.hasRestriction(Restrictions.PREVENT_MOVE)) {
-                        event.setCancelled(true);
+                    ItemStack hotbar = player.getInventory().getItem(event.getHotbarButton());
+                    if (hotbar != null) {
+                        DataStack item = new DataStack(hotbar);
+                        if (topInventory.getType() != InventoryType.PLAYER &&
+                                item.hasRestriction(Restrictions.PREVENT_MOVE)) {
+                            event.setCancelled(true);
+                        }
                     }
                 }
                 case LEFT, RIGHT -> {
-                    DataStack cursor = (DataStack) event.getCursor();
-                    if (topInventory.getType() != InventoryType.PLAYER &&
-                            cursor.hasRestriction(Restrictions.PREVENT_MOVE)) {
-                        event.setCancelled(true);
+                    ItemStack cursor = event.getCursor();
+                    if (cursor != null) {
+                        DataStack cursorItem = new DataStack(cursor);
+                        if (topInventory.getType() != InventoryType.PLAYER &&
+                                cursorItem.hasRestriction(Restrictions.PREVENT_MOVE)) {
+                            event.setCancelled(true);
+                        }
                     }
                 }
                 case SHIFT_LEFT, SHIFT_RIGHT -> {
-                    DataStack clicked = (DataStack) event.getCurrentItem();
-                    if (clicked != null && clicked.hasRestriction(Restrictions.PREVENT_MOVE)) {
-                        event.setCancelled(true);
+                    ItemStack clicked = event.getCurrentItem();
+                    if (clicked != null) {
+                        DataStack clickedItem = new DataStack(clicked);
+                        if (clickedItem.hasRestriction(Restrictions.PREVENT_MOVE)) {
+                            event.setCancelled(true);
+                        }
                     }
                 }
                 case SWAP_OFFHAND -> {
-                    DataStack offhand = (DataStack) player.getInventory().getItemInOffHand();
-                    if (topInventory.getType() != InventoryType.PLAYER &&
-                            offhand.hasRestriction(Restrictions.PREVENT_MOVE)) {
-                        event.setCancelled(true);
+                    ItemStack offhand = player.getInventory().getItemInOffHand();
+                    if (offhand != null) {
+                        DataStack offhandItem = new DataStack(offhand);
+                        if (topInventory.getType() != InventoryType.PLAYER &&
+                                offhandItem.hasRestriction(Restrictions.PREVENT_MOVE)) {
+                            event.setCancelled(true);
+                        }
                     }
                 }
             }
@@ -133,17 +163,19 @@ public class RestrictionListeners implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private void cancelDrop(PlayerDropItemEvent event) {
-        DataStack stack = (DataStack) event.getItemDrop().getItemStack();
+        ItemStack dropped = event.getItemDrop().getItemStack();
+        DataStack stack = new DataStack(dropped);
         Player player = event.getPlayer();
 
-        if (player.getGameMode() == GameMode.CREATIVE || !stack.hasRestriction(Restrictions.NO_DROP)) {
+        if (player.getGameMode() == GameMode.CREATIVE ||
+                !stack.hasRestriction(Restrictions.NO_DROP)) {
             return;
         }
 
         playerSet.add(player.getUniqueId());
 
         if (player.getInventory().firstEmpty() == -1) {
-            player.setItemOnCursor(stack);
+            player.setItemOnCursor(dropped);
         }
 
         event.setCancelled(true);
@@ -155,7 +187,8 @@ public class RestrictionListeners implements Listener {
             return;
         }
 
-        DataStack stack = (DataStack) item.getItemStack();
+        ItemStack stackItem = item.getItemStack();
+        DataStack stack = new DataStack(stackItem);
         if (stack.hasRestriction(Restrictions.PREVENT_DESTROY)) {
             event.setCancelled(true);
         }
@@ -172,7 +205,8 @@ public class RestrictionListeners implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void updateInventory(InventoryCloseEvent event) {
-        if (event.getPlayer() instanceof Player player && updateInventoryQueue.remove(player)) {
+        if (event.getPlayer() instanceof Player player &&
+                updateInventoryQueue.remove(player)) {
             BukkitUtils.syncLater(5L, player::updateInventory);
         }
     }

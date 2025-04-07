@@ -28,9 +28,9 @@ public class ItemBuilder {
 
     public ItemBuilder(DataStack item) {
         this.item = Objects.requireNonNull(item, "item");
-        this.meta = item.getItemMeta();
+        this.meta = item.getStack().getItemMeta();
 
-        if (this.meta == null) throw new IllegalArgumentException("The type " + item.getType() + " doesn't support item meta");
+        if (this.meta == null) throw new IllegalArgumentException("The type " + item.getStack().getType() + " doesn't support item meta");
     }
 
     public ItemBuilder data(int data) {
@@ -39,13 +39,13 @@ public class ItemBuilder {
 
     public ItemBuilder durability(short durability) {
         if (!(this.meta instanceof Damageable damageable)) return this;
-        int current = item.getType().getMaxDurability() - damageable.getDamage();
+        int current = item.getStack().getType().getMaxDurability() - damageable.getDamage();
         damageable.setDamage(current - durability);
         return this;
     }
 
     public ItemBuilder amount(int amount) {
-        this.item.setAmount(amount);
+        this.item.getStack().setAmount(amount);
         return this;
     }
 
@@ -195,7 +195,7 @@ public class ItemBuilder {
     }
 
     public DataStack build() {
-        this.item.setItemMeta(this.meta);
+        this.item.getStack().setItemMeta(this.meta);
         return this.item;
     }
 }
