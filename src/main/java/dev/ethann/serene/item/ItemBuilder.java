@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -14,7 +15,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.UUID;
 
 @SuppressWarnings("unused")
 public class ItemBuilder {
@@ -81,8 +81,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder name(String name) {
-        this.meta.displayName(MINI_MESSAGE.deserialize(name));
-        return this;
+        return name(MINI_MESSAGE.deserialize(name));
     }
 
     public ItemBuilder name(Component name) {
@@ -90,43 +89,41 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder lore(String lore) {
-        return lore(Collections.singletonList(lore));
+    public ItemBuilder lore(Component... components) {
+        return lore(Arrays.asList(components));
     }
 
-    public ItemBuilder lore(String... lore) {
-        return lore(Arrays.asList(lore));
-    }
-
-    public ItemBuilder lore(List<String> lore) {
-        List<Component> components = new ArrayList<>();
-        for (String line : lore) {
-            components.add(MINI_MESSAGE.deserialize(line));
-        }
+    public ItemBuilder lore(List<Component> components) {
         this.meta.lore(components);
         return this;
     }
 
-    public ItemBuilder addLore(String line) {
+    public ItemBuilder addLore(Component... components) {
         List<Component> lore = this.meta.lore() != null ?
-                new ArrayList<>(Objects.requireNonNull(this.meta.lore())) : new ArrayList<>();
-        lore.add(MINI_MESSAGE.deserialize(line));
+                new ArrayList<>(this.meta.lore()) : new ArrayList<>();
+        Collections.addAll(lore, components);
         this.meta.lore(lore);
         return this;
     }
 
-    public ItemBuilder addLore(String... lines) {
-        return addLore(Arrays.asList(lines));
+    public ItemBuilder loreMini(String... lines) {
+        return loreMini(Arrays.asList(lines));
     }
 
-    public ItemBuilder addLore(List<String> lines) {
-        List<Component> lore = this.meta.lore() != null ?
-                new ArrayList<>(Objects.requireNonNull(this.meta.lore())) : new ArrayList<>();
+    public ItemBuilder loreMini(List<String> lines) {
+        List<Component> components = new ArrayList<>();
         for (String line : lines) {
-            lore.add(MINI_MESSAGE.deserialize(line));
+            components.add(MINI_MESSAGE.deserialize(line));
         }
-        this.meta.lore(lore);
-        return this;
+        return lore(components);
+    }
+
+    public ItemBuilder addLoreMini(String... lines) {
+        List<Component> components = new ArrayList<>();
+        for (String line : lines) {
+            components.add(MINI_MESSAGE.deserialize(line));
+        }
+        return addLore(components.toArray(new Component[0]));
     }
 
     public ItemBuilder flags(ItemFlag... flags) {
@@ -202,5 +199,10 @@ public class ItemBuilder {
     public DataStack build() {
         this.item.getStack().setItemMeta(this.meta);
         return this.item;
+    }
+
+    public ItemStack buildStack() {
+        this.item.getStack().setItemMeta(this.meta);
+        return this.item.getStack();
     }
 }
