@@ -85,6 +85,11 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder name(Component name) {
+        this.meta.displayName(name);
+        return this;
+    }
+
     public ItemBuilder lore(String lore) {
         return lore(Collections.singletonList(lore));
     }
