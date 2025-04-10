@@ -4,6 +4,7 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -30,7 +31,14 @@ public class ItemBuilder {
         this.item = Objects.requireNonNull(item, "item");
         this.meta = item.getStack().getItemMeta();
 
-        if (this.meta == null) throw new IllegalArgumentException("The type " + item.getStack().getType() + " doesn't support item meta");
+        if (this.meta == null)
+            throw new IllegalArgumentException(
+                    "The type " + item.getStack().getType() + " doesn't support item meta"
+            );
+    }
+
+    private static Component noItalics(Component component) {
+        return component.decoration(TextDecoration.ITALIC, false);
     }
 
     public ItemBuilder data(int data) {
@@ -39,7 +47,8 @@ public class ItemBuilder {
 
     public ItemBuilder durability(short durability) {
         if (!(this.meta instanceof Damageable damageable)) return this;
-        int current = item.getStack().getType().getMaxDurability() - damageable.getDamage();
+        int current =
+                item.getStack().getType().getMaxDurability() - damageable.getDamage();
         damageable.setDamage(current - durability);
         return this;
     }
@@ -73,7 +82,10 @@ public class ItemBuilder {
         return this;
     }
 
-    public <T extends ItemMeta> ItemBuilder meta(Class<T> metaClass, Consumer<T> metaConsumer) {
+    public <T extends ItemMeta> ItemBuilder meta(
+            Class<T> metaClass,
+            Consumer<T> metaConsumer
+    ) {
         if (metaClass.isInstance(this.meta)) {
             metaConsumer.accept(metaClass.cast(this.meta));
         }
@@ -85,7 +97,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder name(Component name) {
-        this.meta.displayName(name);
+        this.meta.displayName(noItalics(name));
         return this;
     }
 
@@ -94,14 +106,22 @@ public class ItemBuilder {
     }
 
     public ItemBuilder lore(List<Component> components) {
-        this.meta.lore(components);
+        List<Component> noItalicsLore = new ArrayList<>(components.size());
+        for (Component c : components) {
+            noItalicsLore.add(noItalics(c));
+        }
+        this.meta.lore(noItalicsLore);
         return this;
     }
 
     public ItemBuilder addLore(Component... components) {
-        List<Component> lore = this.meta.lore() != null ?
-                new ArrayList<>(this.meta.lore()) : new ArrayList<>();
-        Collections.addAll(lore, components);
+        List<Component> lore =
+                this.meta.lore() != null
+                        ? new ArrayList<>(this.meta.lore())
+                        : new ArrayList<>();
+        for (Component c : components) {
+            lore.add(noItalics(c));
+        }
         this.meta.lore(lore);
         return this;
     }
@@ -113,7 +133,7 @@ public class ItemBuilder {
     public ItemBuilder loreMini(List<String> lines) {
         List<Component> components = new ArrayList<>();
         for (String line : lines) {
-            components.add(MINI_MESSAGE.deserialize(line));
+            components.add(noItalics(MINI_MESSAGE.deserialize(line)));
         }
         return lore(components);
     }
@@ -121,7 +141,7 @@ public class ItemBuilder {
     public ItemBuilder addLoreMini(String... lines) {
         List<Component> components = new ArrayList<>();
         for (String line : lines) {
-            components.add(MINI_MESSAGE.deserialize(line));
+            components.add(noItalics(MINI_MESSAGE.deserialize(line)));
         }
         return addLore(components.toArray(new Component[0]));
     }
@@ -178,18 +198,22 @@ public class ItemBuilder {
     public ItemBuilder replace(String placeholder, String value) {
         Component displayName = meta.displayName();
         if (displayName != null) {
-            meta.displayName(displayName.replaceText(b ->
-                    b.matchLiteral(placeholder).replacement(value)
-            ));
+            meta.displayName(
+                    displayName.replaceText(b ->
+                            b.matchLiteral(placeholder).replacement(value)
+                    )
+            );
         }
 
         List<Component> lore = meta.lore();
         if (lore != null) {
             List<Component> newLore = new ArrayList<>();
             for (Component line : lore) {
-                newLore.add(line.replaceText(b ->
-                        b.matchLiteral(placeholder).replacement(value)
-                ));
+                newLore.add(
+                        line.replaceText(b ->
+                                b.matchLiteral(placeholder).replacement(value)
+                        )
+                );
             }
             meta.lore(newLore);
         }
