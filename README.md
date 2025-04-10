@@ -19,7 +19,7 @@ And then add the following dependency:
 <dependency>
   <groupId>com.github.ethan-davies</groupId>
   <artifactId>Serene</artifactId>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
 </dependency>
 ```
 
